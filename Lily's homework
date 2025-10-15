@@ -1,0 +1,62 @@
+typedef struct {
+    int value;
+    int index;
+} Pair;
+
+// Compare functions for qsort
+int compareAsc(const void *a, const void *b) {
+    return ((Pair*)a)->value - ((Pair*)b)->value;
+}
+
+int compareDesc(const void *a, const void *b) {
+    return ((Pair*)b)->value - ((Pair*)a)->value;
+}
+
+// Function to count minimum swaps to sort the array
+int countSwaps(int *arr, int n, int ascending) {
+    Pair *pairs = malloc(n * sizeof(Pair));
+    bool *visited = calloc(n, sizeof(bool));
+
+    // Store elements with original indices
+    for (int i = 0; i < n; i++) {
+        pairs[i].value = arr[i];
+        pairs[i].index = i;
+    }
+
+    // Sort in chosen order
+    if (ascending)
+        qsort(pairs, n, sizeof(Pair), compareAsc);
+    else
+        qsort(pairs, n, sizeof(Pair), compareDesc);
+
+    int swaps = 0;
+
+    // Count cycles
+    for (int i = 0; i < n; i++) {
+        if (visited[i] || pairs[i].index == i)
+            continue;
+
+        int cycle_size = 0;
+        int j = i;
+
+        while (!visited[j]) {
+            visited[j] = true;
+            j = pairs[j].index;
+            cycle_size++;
+        }
+
+        if (cycle_size > 1)
+            swaps += (cycle_size - 1);
+    }
+
+    free(pairs);
+    free(visited);
+
+    return swaps;
+}
+
+int lilysHomework(int arr[], int n) {
+    int ascSwaps = countSwaps(arr, n, 1);
+    int descSwaps = countSwaps(arr, n, 0);
+    return ascSwaps < descSwaps ? ascSwaps : descSwaps;
+}
